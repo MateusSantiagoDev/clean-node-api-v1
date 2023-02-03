@@ -21,6 +21,7 @@ const makeSut = (): SutTypes => {
   }
 }
 describe('SignUp Controller', () => {
+  // testa se foi enviado nome
   test('Should return 400 if no name id provided', () => {
     const { sut } = makeSut()
     const httpRequest = {
@@ -35,6 +36,7 @@ describe('SignUp Controller', () => {
     expect(httpResponse.body).toEqual(new MIssingParamError('name'))
   })
 
+  // testa se foi enviado email
   test('Should return 400 if no email id provided', () => {
     const { sut } = makeSut()
     const httpRequest = {
@@ -49,6 +51,7 @@ describe('SignUp Controller', () => {
     expect(httpResponse.body).toEqual(new MIssingParamError('email'))
   })
 
+  // testa se foi enviado password
   test('Should return 400 if no password is provided', () => {
     const { sut } = makeSut()
     const httpRequest = {
@@ -63,6 +66,7 @@ describe('SignUp Controller', () => {
     expect(httpResponse.body).toEqual(new MIssingParamError('password'))
   })
 
+  // testa se foi enviado password confirmation
   test('Should return 400 if no password confirmation is provided', () => {
     const { sut } = makeSut()
     const httpRequest = {
@@ -77,6 +81,7 @@ describe('SignUp Controller', () => {
     expect(httpResponse.body).toEqual(new MIssingParamError('passwordConfirmation'))
   })
 
+  // testa se foi enviado email invalido
   test('Should return 400 if an invalid emailis provided', () => {
     const { sut, emailValidatorStub } = makeSut()
     jest.spyOn(emailValidatorStub, 'invalid').mockReturnValueOnce(false)
@@ -91,5 +96,21 @@ describe('SignUp Controller', () => {
     const httpResponse = sut.handle(httpRequest)
     expect(httpResponse.statusCode).toBe(400)
     expect(httpResponse.body).toEqual(new InvalidParamError('email'))
+  })
+
+  // garante que o emailValidator sejá chamado por um email valido
+  test('Should call EmailValidator with correct email', () => {
+    const { sut, emailValidatorStub } = makeSut()
+    const isValidSpy = jest.spyOn(emailValidatorStub, 'invalid')
+    const httpRequest = {
+      body: {
+        name: 'any_name',
+        email: 'any_email@mail.com',
+        password: 'any_password',
+        passwordConfirmation: 'any_password'
+      }
+    }
+    sut.handle(httpRequest)
+    expect(isValidSpy).toHaveBeenCalledWith('any_email@mail.com')
   })
 })
