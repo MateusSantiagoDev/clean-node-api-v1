@@ -38,4 +38,21 @@ describe('DbAccount Usecase', () => {
     await sut.add(accountData)
     expect(encryptSpy).toHaveBeenCalledWith('valid_password')
   })
+
+  // se houver algum erro (exceção) no encrypter vai ser repassado para
+  // o controller onde esta sendo feito o tratamento de exceções
+  // obs: estou usando essa promisse para garantir q o test seja tratado
+  // direto no controller (vai passar direto por aqui...)
+  test('Should throw if Encrypter throws', async () => {
+    const { sut, encrypterStub } = makeSut()
+    jest.spyOn(encrypterStub, 'encrypt').mockReturnValueOnce(new Promise((resolve, reject) => reject(new Error())))
+    const accountData = {
+      name: 'valid_name',
+      email: 'valid_email',
+      password: 'valid_password'
+    }
+
+    const promise = sut.add(accountData)
+    await expect(promise).rejects.toThrow()
+  })
 })
